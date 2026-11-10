@@ -1,0 +1,421 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+
+@model SmartInventory.Models.ViewModels.RegisterViewModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Create Your Account";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account | SmartInventory</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'DM Sans', sans-serif;
+            background: radial-gradient(circle at 15% 15%, #e6d5bd 0, transparent 30%), radial-gradient(circle at 90% 85%, #d9c3aa 0, transparent 30%), #f4eee5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 45px 20px;
+            color: #49392f;
+        }
+
+        .register-wrapper {
+            width: 100%;
+            max-width: 1050px;
+            min-height: 690px;
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            background: #fffdf9;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(74, 59, 50, 0.18);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .welcome-panel {
+            background: linear-gradient(145deg, #49392f, #78604d);
+            color: #fffaf2;
+            padding: 65px 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .welcome-panel::before,
+            .welcome-panel::after {
+                content: "";
+                position: absolute;
+                border: 1px solid rgba(226, 201, 163, 0.3);
+                border-radius: 50%;
+                width: 300px;
+                height: 300px;
+                right: -150px;
+                top: 15%;
+            }
+
+            .welcome-panel::after {
+                width: 420px;
+                height: 420px;
+                right: -210px;
+                top: 35%;
+            }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 29px;
+            color: #ead5b5;
+            letter-spacing: 1px;
+        }
+
+            .brand small {
+                display: block;
+                font-family: 'DM Sans', sans-serif;
+                font-size: 10px;
+                letter-spacing: 4px;
+                margin-top: 8px;
+                color: #d7c4ad;
+            }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+        }
+
+            .welcome-content h1 {
+                font-family: 'Playfair Display', serif;
+                font-size: 43px;
+                line-height: 1.2;
+                margin-bottom: 20px;
+                font-weight: 600;
+            }
+
+            .welcome-content p {
+                color: #e0d4c7;
+                line-height: 1.9;
+                font-size: 14px;
+                max-width: 340px;
+            }
+
+        .welcome-footer {
+            color: #d7c4ad;
+            font-size: 12px;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-panel {
+            padding: 55px 65px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-heading {
+            margin-bottom: 30px;
+        }
+
+            .form-heading .eyebrow {
+                color: #a78a68;
+                font-size: 11px;
+                letter-spacing: 3px;
+                font-weight: 700;
+                text-transform: uppercase;
+            }
+
+            .form-heading h2 {
+                font-family: 'Playfair Display', serif;
+                font-size: 36px;
+                margin: 10px 0;
+                color: #49392f;
+            }
+
+            .form-heading p {
+                color: #938478;
+                font-size: 14px;
+            }
+
+        .form-group {
+            margin-bottom: 19px;
+        }
+
+            .form-group label {
+                display: block;
+                font-size: 13px;
+                font-weight: 700;
+                margin-bottom: 9px;
+                color: #59483c;
+            }
+
+        .form-control,
+        .form-select {
+            width: 100%;
+            height: 53px;
+            border: 1px solid #e6ddd2;
+            border-radius: 12px;
+            background: #faf7f2;
+            padding: 0 16px;
+            font-family: inherit;
+            font-size: 14px;
+            color: #49392f;
+            outline: none;
+            transition: 0.25s;
+        }
+
+            .form-control:focus,
+            .form-select:focus {
+                border-color: #aa8962;
+                background: white;
+                box-shadow: 0 0 0 4px rgba(170, 137, 98, 0.12);
+            }
+
+            .form-control::placeholder {
+                color: #b3a69a;
+            }
+
+        .create-btn {
+            width: 100%;
+            height: 56px;
+            border: none;
+            border-radius: 13px;
+            background: linear-gradient(110deg, #49392f, #80664f);
+            color: white;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 10px 22px rgba(73, 57, 47, 0.2);
+            transition: 0.25s;
+        }
+
+            .create-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 28px rgba(73, 57, 47, 0.28);
+            }
+
+        .login-text {
+            text-align: center;
+            color: #958779;
+            font-size: 13px;
+            margin-top: 25px;
+        }
+
+            .login-text a {
+                color: #806143;
+                font-weight: 700;
+                text-decoration: none;
+                margin-left: 5px;
+            }
+
+                .login-text a:hover {
+                    text-decoration: underline;
+                }
+
+        .validation {
+            color: #b54747;
+            font-size: 12px;
+            margin-top: 6px;
+            display: block;
+        }
+
+        #adminCodeSection {
+            display: none;
+        }
+
+        @@media (max-width: 800px) {
+            .register-wrapper {
+                max-width: 540px;
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-panel {
+                min-height: 260px;
+                padding: 35px;
+            }
+
+            .welcome-content h1 {
+                font-size: 31px;
+                margin-top: 35px;
+            }
+
+            .welcome-footer {
+                margin-top: 25px;
+            }
+
+            .form-panel {
+                padding: 40px 30px;
+            }
+        }
+
+        @@media (max-width: 420px) {
+            body {
+                padding: 15px 10px;
+            }
+
+            .form-panel {
+                padding: 32px 22px;
+            }
+
+            .form-heading h2 {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="register-wrapper">
+
+        <section class="welcome-panel">
+            <div class="brand">
+                SmartInventory
+                <small>SMART BUSINESS MANAGEMENT</small>
+            </div>
+
+            <div class="welcome-content">
+                <h1>Manage Your<br />Business With<br />Elegance.</h1>
+                <p>
+                    A smarter way to manage products, monitor inventory
+                    and keep your business organized — all in one place.
+                </p>
+            </div>
+
+            <div class="welcome-footer">
+                PREMIUM INVENTORY EXPERIENCE
+            </div>
+        </section>
+
+        <section class="form-panel">
+            <div class="form-heading">
+                <span class="eyebrow">GET STARTED</span>
+                <h2>Create Account</h2>
+                <p>Enter your details to join SmartInventory.</p>
+            </div>
+
+            <form asp-controller="Account"
+                  asp-action="Register"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="All"
+                     class="validation"></div>
+
+                <div class="form-group">
+                    <label asp-for="Email">Email Address</label>
+                    <input type="email"
+                           id="Email"
+                           name="Email"
+                           class="form-control"
+                           placeholder="Enter your email address" />
+                    <span asp-validation-for="Email"
+                          class="validation"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Password">Password</label>
+                    <input type="password"
+                           id="Password"
+                           name="Password"
+                           class="form-control"
+                           placeholder="Minimum 8 characters" />
+                    <span asp-validation-for="Password"
+                          class="validation"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ConfirmPassword">Confirm Password</label>
+                    <input type="password"
+                           id="ConfirmPassword"
+                           name="ConfirmPassword"
+                           class="form-control"
+                           placeholder="Enter password again" />
+                    <span asp-validation-for="ConfirmPassword"
+                          class="validation"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="RegistrationType">Account Type</label>
+                    <select asp-for="RegistrationType"
+                            id="RegistrationType"
+                            name="RegistrationType"
+                            class="form-select">
+                        <option value="User">User Account</option>
+                        <option value="Admin">Administrator Account</option>
+                    </select>
+                    <span asp-validation-for="RegistrationType"
+                          class="validation"></span>
+                </div>
+
+                <div class="form-group" id="adminCodeSection">
+                    <label asp-for="AdminInvitationCode">Admin Invitation Code</label>
+                    <input type="password"
+                           id="AdminInvitationCode"
+                           name="AdminInvitationCode"
+                           class="form-control"
+                           placeholder="Enter admin invitation code"
+                           autocomplete="off" />
+                    <span asp-validation-for="AdminInvitationCode"
+                          class="validation"></span>
+                </div>
+
+                <button type="submit" class="create-btn">
+                    CREATE YOUR ACCOUNT →
+                </button>
+            </form>
+
+            <div class="login-text">
+                Already have an account?
+                <a href="/Account/Login">Sign In</a>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const registrationType =
+                document.getElementById("RegistrationType");
+
+            const adminCodeSection =
+                document.getElementById("adminCodeSection");
+
+            if (!registrationType || !adminCodeSection) {
+                return;
+            }
+
+            function toggleAdminCode() {
+                adminCodeSection.style.display =
+                    registrationType.value === "Admin" ? "block" : "none";
+            }
+
+            registrationType.addEventListener("change", toggleAdminCode);
+            toggleAdminCode();
+        });
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

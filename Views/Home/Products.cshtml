@@ -1,0 +1,858 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+
+@model IEnumerable<SmartInventory.Models.Product>
+
+@{
+    Layout = null;
+
+    var products = Model?.ToList() ?? new List<SmartInventory.Models.Product>();
+    var isAdmin = User.IsInRole("Admin");
+
+    var totalStock = products.Sum(p => p.Stock);
+    var outOfStock = products.Count(p => p.Stock <= 0);
+    var lowStock = products.Count(p => p.Stock > 0 && p.Stock <= 5);
+
+    var lowStockProducts = products
+        .Where(p => p.Stock > 0 && p.Stock <= 5)
+        .ToList();
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Products | SmartInventory</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #F6F2EA;
+            color: #30251D;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 245px;
+            height: 100vh;
+            padding: 30px 20px;
+            color: #F8F1E6;
+            background: linear-gradient(160deg, #211B17, #493629);
+            border-right: 1px solid #B08A55;
+        }
+
+        .brand {
+            font-family: Georgia, serif;
+            font-size: 23px;
+            font-weight: 700;
+            margin-bottom: 48px;
+        }
+
+            .brand span {
+                color: #D9B77C;
+            }
+
+        .nav-title {
+            color: #BDA98D;
+            font-size: 10px;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .nav-link {
+            display: block;
+            color: #E8DED3;
+            text-decoration: none;
+            padding: 13px 14px;
+            margin: 8px 0;
+            border-radius: 9px;
+            font-size: 13px;
+            transition: .25s;
+        }
+
+            .nav-link:hover,
+            .nav-link.active {
+                background: linear-gradient(100deg, #80613C, #B08A55);
+                color: white;
+            }
+
+        .main {
+            margin-left: 245px;
+            padding: 34px 40px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .page-title {
+            font-family: Georgia, serif;
+            font-size: 31px;
+            font-weight: 500;
+            margin: 0 0 7px;
+        }
+
+        .subtitle {
+            color: #8B7966;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .add-btn {
+            display: inline-block;
+            background: linear-gradient(120deg, #80613C, #B18B55);
+            color: white;
+            padding: 12px 19px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 650;
+            box-shadow: 0 5px 15px #80613C30;
+            white-space: nowrap;
+        }
+
+            .add-btn:hover {
+                background: #705333;
+            }
+
+        .back-link {
+            display: inline-block;
+            color: #967342;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            margin: 8px 0 25px;
+        }
+
+        .summary {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+            .summary.admin-summary {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+
+            .summary.user-summary {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+        .summary-card {
+            background: #FFFDFA;
+            border: 1px solid #E8DDCD;
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 6px 20px #38271908;
+        }
+
+            .summary-card small {
+                color: #927E69;
+                font-size: 11px;
+            }
+
+            .summary-card h2 {
+                font-family: Georgia, serif;
+                color: #80613C;
+                font-size: 25px;
+                margin: 7px 0 0;
+            }
+
+        .section-title {
+            font-family: Georgia, serif;
+            font-size: 21px;
+            font-weight: 500;
+            margin: 0 0 18px;
+        }
+
+        /* Admin-only Low Stock Alert */
+        .low-stock-alert {
+            background: #FFF0D8;
+            border: 1px solid #E8C98F;
+            border-left: 5px solid #C58A32;
+            border-radius: 10px;
+            padding: 17px 20px;
+            margin-bottom: 25px;
+        }
+
+            .low-stock-alert h3 {
+                color: #9A681E;
+                margin: 0 0 10px;
+                font-size: 16px;
+            }
+
+        .alert-item {
+            color: #705333;
+            font-size: 12px;
+            margin: 8px 0;
+        }
+
+            .alert-item strong {
+                color: #49372A;
+            }
+
+        .no-low-stock {
+            background: #E8EFE3;
+            border: 1px solid #CBDCC0;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            color: #557044;
+            font-size: 13px;
+        }
+
+        /* Product search */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 22px;
+            max-width: 650px;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 0;
+            padding: 13px 15px;
+            border: 1px solid #D8C9BA;
+            border-radius: 9px;
+            background: #FFFDFA;
+            color: #38291F;
+            font-size: 13px;
+            outline: none;
+        }
+
+            .search-input:focus {
+                border-color: #A9824D;
+                box-shadow: 0 0 0 3px #B08A5520;
+            }
+
+        .clear-btn {
+            border: 1px solid #D8C9BA;
+            border-radius: 9px;
+            padding: 0 17px;
+            background: #EEE5D7;
+            color: #705333;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+            .clear-btn:hover {
+                background: #E2D3BD;
+            }
+
+        .search-result {
+            color: #927E69;
+            font-size: 11px;
+            margin: -12px 0 18px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+            gap: 22px;
+        }
+
+        .product-card {
+            background: #FFFDFA;
+            border: 1px solid #E8DDCD;
+            border-radius: 13px;
+            overflow: hidden;
+            box-shadow: 0 7px 22px #3827190C;
+            transition: transform .25s, box-shadow .25s;
+        }
+
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 32px #3827191B;
+            }
+
+        .product-image-box {
+            height: 250px;
+            background: linear-gradient(135deg, #EDE3D4, #DCC9AD);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .4s;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.04);
+        }
+
+        .image-placeholder {
+            font-size: 65px;
+            opacity: .65;
+        }
+
+        .product-content {
+            padding: 16px;
+        }
+
+        .product-id {
+            color: #A68A61;
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .product-name {
+            font-family: Georgia, serif;
+            font-size: 18px;
+            color: #30251D;
+            margin: 8px 0 4px;
+            overflow-wrap: anywhere;
+        }
+
+        .category {
+            color: #9B805D;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #817365;
+            font-size: 11px;
+            line-height: 1.6;
+            min-height: 35px;
+            margin-bottom: 12px;
+        }
+
+        .price-stock {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 7px;
+            padding: 12px 0;
+            border-top: 1px solid #EDE5D9;
+            border-bottom: 1px solid #EDE5D9;
+        }
+
+        .price {
+            font-family: Georgia, serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #80613C;
+        }
+
+        .stock {
+            background: #E8EFE3;
+            color: #557044;
+            padding: 6px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+            .stock.low {
+                background: #FFF0D8;
+                color: #9A681E;
+            }
+
+            .stock.empty-stock {
+                background: #F6E4DF;
+                color: #A34F3F;
+            }
+
+        .details {
+            padding-top: 11px;
+            font-size: 10px;
+            color: #827363;
+            line-height: 1.9;
+            overflow-wrap: anywhere;
+        }
+
+            .details strong {
+                color: #49372A;
+            }
+
+        .actions {
+            display: flex;
+            gap: 9px;
+            margin-top: 14px;
+        }
+
+        .edit-btn {
+            display: inline-block;
+            flex: 1;
+            text-align: center;
+            background: #EEE5D7;
+            color: #705333;
+            text-decoration: none;
+            padding: 9px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+            .edit-btn:hover {
+                background: #E2D3BD;
+            }
+
+        .delete-btn {
+            border: none;
+            background: #F5E6E1;
+            color: #A34F3F;
+            padding: 9px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+            .delete-btn:hover {
+                background: #EED5CC;
+            }
+
+        .view-only {
+            display: block;
+            text-align: center;
+            margin-top: 14px;
+            padding: 8px;
+            color: #9B805D;
+            background: #F4EEE4;
+            border-radius: 7px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .empty,
+        .no-results {
+            background: #FFFDFA;
+            border: 1px solid #E8DDCD;
+            border-radius: 13px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #8A7968;
+            grid-column: 1 / -1;
+        }
+
+        .no-results {
+            display: none;
+        }
+
+        @@media (max-width: 1000px) {
+            .summary.admin-summary,
+            .summary.user-summary {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @@media (max-width: 800px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 22px;
+            }
+
+            .brand {
+                margin-bottom: 25px;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 24px 15px;
+            }
+
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .product-image-box {
+                height: 270px;
+            }
+
+            .page-title {
+                font-size: 27px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .clear-btn {
+                padding: 12px;
+            }
+
+            .summary.admin-summary,
+            .summary.user-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">Smart<span>Inventory.</span></div>
+
+        <div class="nav-title">MAIN MENU</div>
+
+        <a class="nav-link" href="/Home/Index">⌂ Dashboard</a>
+        <a class="nav-link active" href="/Home/Products">▦ Products</a>
+
+        @if (isAdmin)
+        {
+            <a class="nav-link" href="/Home/AddProduct">＋ Add Product</a>
+        }
+
+        <a class="nav-link" href="/Home/Chatbot">✧ AI Assistant</a>
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <div>
+                <h1 class="page-title">Product Collection</h1>
+                <p class="subtitle">A refined overview of your inventory.</p>
+            </div>
+
+            @if (isAdmin)
+            {
+                <a href="/Home/AddProduct" class="add-btn">＋ Add New Product</a>
+            }
+        </div>
+
+        <a href="/Home/Index" class="back-link">← Back to Dashboard</a>
+
+        <!-- Summary Cards -->
+        <div class="summary @(isAdmin ? "admin-summary" : "user-summary")">
+
+            <div class="summary-card">
+                <small>Total Products</small>
+                <h2 id="totalProducts">@products.Count</h2>
+            </div>
+
+            <div class="summary-card">
+                <small>Total Stock Units</small>
+                <h2 id="totalStock">@totalStock</h2>
+            </div>
+
+            <div class="summary-card">
+                <small>Out of Stock</small>
+                <h2 id="outOfStock">@outOfStock</h2>
+            </div>
+
+            @if (isAdmin)
+            {
+                <div class="summary-card">
+                    <small>Low Stock (1–5 Units)</small>
+                    <h2 id="lowStock" style="color:#9A681E;">@lowStock</h2>
+                </div>
+            }
+
+        </div>
+
+        <!-- Low Stock Alert: Admin Only -->
+        @if (isAdmin)
+        {
+            @if (lowStockProducts.Any())
+            {
+                <div class="low-stock-alert" id="lowStockAlert">
+
+                    <h3>⚠️ Low Stock Alert</h3>
+
+                    <p style="font-size:12px; color:#705333;">
+                        In products ka stock 5 ya usse kam hai:
+                    </p>
+
+                    @foreach (var item in lowStockProducts)
+                    {
+                        <div class="alert-item">
+                            <strong>@item.Name</strong>
+                            — Sirf @item.Stock units bachi hain.
+                        </div>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <div class="no-low-stock" id="lowStockAlert">
+                    ✅ Great! Abhi koi low-stock product nahi hai.
+                </div>
+            }
+        }
+
+        <h2 class="section-title">All Products</h2>
+
+        <!-- Product Search -->
+        <div class="search-box">
+            <input type="search"
+                   id="productSearch"
+                   class="search-input"
+                   placeholder="Search by product name, category, SKU or supplier..." />
+
+            <button type="button" id="clearSearch" class="clear-btn">
+                Clear
+            </button>
+        </div>
+
+        <div class="search-result" id="searchResult">
+            Showing @products.Count products
+        </div>
+
+        <!-- Product Cards -->
+        <div class="product-grid" id="productGrid">
+
+            @if (products.Any())
+            {
+                foreach (var product in products)
+                {
+                    var searchText = $"{product.Name} {product.Category} {product.Description} {product.SKU} {product.SupplierName}";
+
+                    <div class="product-card"
+                         data-search="@searchText"
+                         data-stock="@product.Stock">
+
+                        <div class="product-image-box">
+                            @if (!string.IsNullOrWhiteSpace(product.ImagePath))
+                            {
+                                <img src="@product.ImagePath"
+                                     alt="@product.Name"
+                                     class="product-image" />
+                            }
+                            else
+                            {
+                                <div class="image-placeholder">📦</div>
+                            }
+                </div>
+
+                <div class="product-content">
+
+                    <div class="product-id">PRODUCT #@product.Id</div>
+
+                    <div class="product-name">@product.Name</div>
+
+                    <div class="category">
+                        @(string.IsNullOrWhiteSpace(product.Category)
+                                                ? "Uncategorized"
+                                                : product.Category)
+                                                               </div>
+
+                    <div class="description">
+                        @(string.IsNullOrWhiteSpace(product.Description)
+                                                ? "No description available"
+                                                : product.Description)
+                    </div>
+
+                            <div class="price-stock">
+
+                                <div class="price">
+                                    ₹@product.Price.ToString("N2")
+                                </div>
+
+                        @if (product.Stock <= 0)
+                                {
+                                    <span class="stock empty-stock">
+                                        Out of Stock
+                                    </span>
+                                }
+                                else if (product.Stock <= 5)
+                                {
+                                    <span class="stock low">
+                                        ⚠ Low: @product.Stock
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="stock">
+                                        In Stock: @product.Stock
+                                    </span>
+                                }
+
+                    </div>
+
+                    <div class="details">
+
+                        <div>
+                            <strong>SKU:</strong>
+                            @(string.IsNullOrWhiteSpace(product.SKU)
+                                                        ? "Not provided"
+                                                        : product.SKU)
+                                                                  </div>
+
+                        <div>
+                            <strong>Supplier:</strong>
+                            @(string.IsNullOrWhiteSpace(product.SupplierName)
+                                                        ? "Not provided"
+                                                        : product.SupplierName)
+                                                                           </div>
+
+                        <div>
+                            <strong>Purchase Date:</strong>
+                            @(product.PurchaseDate?.ToString("dd MMM yyyy")
+                                                        ?? "Not provided")
+                        </div>
+
+                            </div>
+
+                    @if (isAdmin)
+                            {
+                                <div class="actions">
+
+                                    <a href="/Home/EditProduct/@product.Id"
+                                       class="edit-btn">
+                                        Edit
+                                    </a>
+
+                                    <form action="/Home/DeleteProduct"
+                                          method="post"
+                                          style="flex:1;"
+                                          onsubmit="return confirm('Are you sure you want to delete this product?');">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@product.Id" />
+
+                                        <button type="submit"
+                                                class="delete-btn"
+                                                style="width:100%;">
+                                            Delete
+                                        </button>
+
+                                    </form>
+
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="view-only">VIEW ONLY</span>
+                            }
+
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty">
+                    <div style="font-size:45px;">📦</div>
+                    <h3>No Products Found</h3>
+                    <p>Add your first product to get started.</p>
+
+                    @if (isAdmin)
+                    {
+                        <a href="/Home/AddProduct" class="add-btn">
+                            ＋ Add Product
+                        </a>
+                    }
+                </div>
+            }
+
+            <div class="no-results" id="noResults">
+                <div style="font-size:40px;">🔎</div>
+                <h3>No Matching Products</h3>
+                <p>Try another product name, category, SKU or supplier.</p>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        const searchInput = document.getElementById("productSearch");
+        const clearButton = document.getElementById("clearSearch");
+        const cards = Array.from(document.querySelectorAll(".product-card"));
+        const noResults = document.getElementById("noResults");
+        const searchResult = document.getElementById("searchResult");
+
+        const totalProductsElement = document.getElementById("totalProducts");
+        const totalStockElement = document.getElementById("totalStock");
+        const outOfStockElement = document.getElementById("outOfStock");
+
+        // Ye element sirf Admin ko milega.
+        const lowStockElement = document.getElementById("lowStock");
+
+        function searchProducts() {
+            const query = searchInput.value.trim().toLowerCase();
+
+            let visibleCount = 0;
+            let visibleStock = 0;
+            let visibleOutOfStock = 0;
+            let visibleLowStock = 0;
+
+            cards.forEach(card => {
+                const searchableText = (card.dataset.search || "").toLowerCase();
+                const stock = Number(card.dataset.stock || 0);
+
+                const matches = searchableText.includes(query);
+
+                card.style.display = matches ? "" : "none";
+
+                if (matches) {
+                    visibleCount++;
+                    visibleStock += stock;
+
+                    if (stock <= 0) {
+                        visibleOutOfStock++;
+                    }
+                    else if (stock <= 5) {
+                        visibleLowStock++;
+                    }
+                }
+            });
+
+            noResults.style.display =
+                (cards.length > 0 && visibleCount === 0) ? "block" : "none";
+
+            searchResult.textContent =
+                `Showing ${visibleCount} of ${cards.length} products`;
+
+            totalProductsElement.textContent = visibleCount;
+            totalStockElement.textContent = visibleStock;
+            outOfStockElement.textContent = visibleOutOfStock;
+
+            // Low Stock count sirf Admin ke liye update hoga.
+            if (lowStockElement) {
+                lowStockElement.textContent = visibleLowStock;
+            }
+        }
+
+        searchInput.addEventListener("input", searchProducts);
+
+        clearButton.addEventListener("click", function () {
+            searchInput.value = "";
+            searchProducts();
+            searchInput.focus();
+        });
+    </script>
+
+</body>
+</html>

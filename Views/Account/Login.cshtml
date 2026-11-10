@@ -1,0 +1,527 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+    
+
+
+@model SmartInventory.Models.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "SmartInventory Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>SmartInventory | Secure Login</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            width: 100%;
+            font-family: 'DM Sans', sans-serif;
+            background: radial-gradient(circle at 15% 15%, #e6d5bd 0, transparent 30%), radial-gradient(circle at 90% 85%, #d9c3aa 0, transparent 30%), #f4eee5;
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+            color: #49392f;
+        }
+
+        /* MAIN LOGIN LAYOUT */
+
+        .login-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 42% 58%;
+            background: #fffdf9;
+            overflow: hidden;
+        }
+
+        /* LEFT WELCOME PANEL */
+
+        .welcome-panel {
+            background: linear-gradient(145deg, #49392f, #78604d);
+            color: #fffaf2;
+            padding: 8vh 6vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .welcome-panel::before,
+            .welcome-panel::after {
+                content: "";
+                position: absolute;
+                border: 1px solid rgba(226, 201, 163, 0.3);
+                border-radius: 50%;
+                width: 300px;
+                height: 300px;
+                right: -150px;
+                top: 15%;
+            }
+
+            .welcome-panel::after {
+                width: 420px;
+                height: 420px;
+                right: -210px;
+                top: 35%;
+            }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            color: #ead5b5;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        }
+
+            .brand small {
+                display: block;
+                font-family: 'DM Sans', sans-serif;
+                font-size: 10px;
+                letter-spacing: 4px;
+                margin-top: 9px;
+                color: #d7c4ad;
+            }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+        }
+
+            .welcome-content .eyebrow {
+                color: #e5c99e;
+                font-size: 11px;
+                letter-spacing: 3px;
+                font-weight: 700;
+            }
+
+            .welcome-content h1 {
+                font-family: 'Playfair Display', serif;
+                font-size: clamp(36px, 4vw, 58px);
+                line-height: 1.2;
+                margin: 20px 0;
+                font-weight: 600;
+            }
+
+            .welcome-content p {
+                color: #e0d4c7;
+                line-height: 1.9;
+                font-size: 15px;
+                max-width: 430px;
+            }
+
+        .welcome-features {
+            margin-top: 35px;
+            color: #ead5b5;
+            font-size: 13px;
+            line-height: 2.5;
+        }
+
+        .welcome-footer {
+            color: #d7c4ad;
+            font-size: 12px;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* RIGHT LOGIN PANEL */
+
+        .form-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 50px 8vw;
+            overflow-y: auto;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .form-heading {
+            margin-bottom: 35px;
+        }
+
+            .form-heading .eyebrow {
+                color: #a78a68;
+                font-size: 11px;
+                letter-spacing: 3px;
+                font-weight: 700;
+            }
+
+            .form-heading h2 {
+                font-family: 'Playfair Display', serif;
+                font-size: 42px;
+                margin: 12px 0;
+                color: #49392f;
+            }
+
+            .form-heading p {
+                color: #938478;
+                font-size: 14px;
+                line-height: 1.7;
+            }
+
+        /* SUCCESS MESSAGE */
+
+        .success-message {
+            background: #eaf3e8;
+            color: #276738;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* FORM FIELDS */
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+            .form-group label {
+                display: block;
+                font-size: 13px;
+                font-weight: 700;
+                margin-bottom: 10px;
+                color: #59483c;
+            }
+
+        .form-control {
+            width: 100%;
+            height: 55px;
+            border: 1px solid #e6ddd2;
+            border-radius: 12px;
+            background: #faf7f2;
+            padding: 0 17px;
+            font-family: inherit;
+            font-size: 14px;
+            color: #49392f;
+            outline: none;
+            transition: 0.25s;
+        }
+
+            .form-control:focus {
+                border-color: #aa8962;
+                background: white;
+                box-shadow: 0 0 0 4px rgba(170, 137, 98, 0.12);
+            }
+
+            .form-control::placeholder {
+                color: #b3a69a;
+            }
+
+        /* REMEMBER ME */
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0 25px;
+        }
+
+            .remember input {
+                width: 17px;
+                height: 17px;
+                accent-color: #80664f;
+                cursor: pointer;
+            }
+
+            .remember label {
+                margin: 0;
+                color: #806f60;
+                font-size: 13px;
+                cursor: pointer;
+            }
+
+        /* LOGIN BUTTON */
+
+        .login-btn {
+            width: 100%;
+            height: 57px;
+            border: none;
+            border-radius: 13px;
+            background: linear-gradient(110deg, #49392f, #80664f);
+            color: white;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(73, 57, 47, 0.2);
+            transition: 0.25s;
+        }
+
+            .login-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 28px rgba(73, 57, 47, 0.28);
+            }
+
+        /* VALIDATION */
+
+        .validation {
+            color: #b54747;
+            font-size: 12px;
+            margin-top: 6px;
+            display: block;
+        }
+
+        /* REGISTER LINK */
+
+        .register-text {
+            text-align: center;
+            color: #958779;
+            font-size: 13px;
+            margin-top: 28px;
+        }
+
+            .register-text a {
+                color: #806143;
+                font-weight: 700;
+                text-decoration: none;
+                margin-left: 5px;
+            }
+
+                .register-text a:hover {
+                    text-decoration: underline;
+                }
+
+        .footer {
+            text-align: center;
+            margin-top: 45px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: #a39384;
+        }
+
+        /* RESPONSIVE DESIGN */
+
+        @@media (max-width: 800px) {
+
+            .login-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-panel {
+                min-height: 320px;
+                padding: 35px;
+            }
+
+            .welcome-content h1 {
+                font-size: 35px;
+            }
+
+            .welcome-features {
+                margin-top: 15px;
+            }
+
+            .form-panel {
+                padding: 45px 30px;
+                overflow-y: visible;
+            }
+        }
+
+        @@media (max-width: 420px) {
+
+            .welcome-panel {
+                padding: 28px;
+            }
+
+            .form-panel {
+                padding: 35px 22px;
+            }
+
+            .form-heading h2 {
+                font-size: 34px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-wrapper">
+
+        <!-- LEFT WELCOME SECTION -->
+
+        <section class="welcome-panel">
+
+            <div class="brand">
+                SmartInventory
+                <small>SMART BUSINESS MANAGEMENT</small>
+            </div>
+
+            <div class="welcome-content">
+
+                <span class="eyebrow">
+                    YOUR BUSINESS. YOUR CONTROL.
+                </span>
+
+                <h1>
+                    Welcome<br />
+                    Back to<br />
+                    SmartInventory.
+                </h1>
+
+                <p>
+                    Your inventory journey continues here.
+                    Sign in securely to manage products,
+                    monitor stock levels and keep your
+                    business moving forward.
+                </p>
+
+                <div class="welcome-features">
+                    ✦ Secure Account Access<br />
+                    ✦ Smart Inventory Management<br />
+                    ✦ Complete Business Overview
+                </div>
+
+            </div>
+
+            <div class="welcome-footer">
+                PREMIUM INVENTORY EXPERIENCE
+            </div>
+
+        </section>
+
+        <!-- RIGHT LOGIN SECTION -->
+
+        <section class="form-panel">
+
+            <div class="login-card">
+
+                <div class="form-heading">
+
+                    <span class="eyebrow">
+                        SECURE ACCESS
+                    </span>
+
+                    <h2>Sign In</h2>
+
+                    <p>
+                        Enter your credentials to access your SmartInventory account.
+                    </p>
+
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="success-message">
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
+
+                <form asp-controller="Account"
+                      asp-action="Login"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="All"
+                         class="validation"></div>
+
+                    <!-- EMAIL -->
+
+                    <div class="form-group">
+
+                        <label asp-for="Email">
+                            Email Address
+                        </label>
+
+                        <input type="email"
+                               name="Email"
+                               id="Email"
+                               class="form-control"
+                               placeholder="Enter your email" />
+
+                        <span asp-validation-for="Email"
+                              class="validation"></span>
+
+                    </div>
+
+                    <!-- PASSWORD -->
+
+                    <div class="form-group">
+
+                        <label asp-for="Password">
+                            Password
+                        </label>
+
+                        <input type="password"
+                               name="Password"
+                               id="Password"
+                               class="form-control"
+                               placeholder="Enter your password" />
+                               @* autocomplete="current-password" /> *@
+
+                        <span asp-validation-for="Password"
+                              class="validation"></span>
+
+                    </div>
+
+                    <!-- REMEMBER ME -->
+
+                    <div class="remember">
+
+                        <input asp-for="RememberMe" />
+
+                        <label asp-for="RememberMe">
+                            Remember me
+                        </label>
+
+                    </div>
+
+                    <!-- LOGIN BUTTON -->
+
+                    <button type="submit" class="login-btn">
+                        SIGN IN →
+                    </button>
+
+                </form>
+
+                <div class="register-text">
+
+                    Don't have an account?
+
+                    <a href="/Account/Register">
+                        Create Account
+                    </a>
+
+                </div>
+
+                <div class="footer">
+                    © 2026 SmartInventory · Secure Account Access
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <partial name="_ValidationScriptsPartial" />
+
+</body>
+</html>
+
+       

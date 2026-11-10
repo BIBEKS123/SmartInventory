@@ -1,0 +1,535 @@
+﻿@model IEnumerable<SmartInventory.Models.Sale>
+
+@{
+    Layout = null;
+
+    var sales = Model?.ToList() ?? new List<SmartInventory.Models.Sale>();
+
+    var totalSales = sales.Sum(s => s.TotalAmount);
+    var totalItems = sales.Sum(s => s.Quantity);
+
+    var todaySales = sales
+        .Where(s => s.SaleDate.Date == DateTime.Today)
+        .Sum(s => s.TotalAmount);
+
+    var monthSales = sales
+        .Where(s => s.SaleDate.Year == DateTime.Today.Year &&
+                    s.SaleDate.Month == DateTime.Today.Month)
+        .Sum(s => s.TotalAmount);
+
+    var topProducts = sales
+        .GroupBy(s => s.Product?.Name ?? "Product unavailable")
+        .Select(g => new
+        {
+            ProductName = g.Key,
+            QuantitySold = g.Sum(s => s.Quantity),
+            Revenue = g.Sum(s => s.TotalAmount)
+        })
+        .OrderByDescending(x => x.QuantitySold)
+        .Take(5)
+        .ToList();
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sales Management - SmartInventory</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            background: #f5f0e8;
+            font-family: Arial, sans-serif;
+            color: #38251c;
+        }
+
+        .container {
+            max-width: 1350px;
+            margin: auto;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 18px;
+            padding: 25px 28px;
+            background: linear-gradient(135deg, #4b2e20, #80552f);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px #38251c25;
+        }
+
+            .top h1 {
+                margin: 0 0 8px;
+                color: #f5d99a;
+                font-size: 29px;
+            }
+
+            .top p {
+                margin: 0;
+                color: #f3e5d2;
+            }
+
+        .top-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 18px;
+            background: #d7ad60;
+            color: #38251c;
+            text-decoration: none;
+            border: 1px solid #e5c47f;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            .btn:hover {
+                background: #f0d394;
+                color: #38251c;
+                transform: translateY(-2px);
+            }
+
+        .dashboard-btn {
+            background: transparent;
+            color: white;
+            border-color: #d7ad60;
+        }
+
+            .dashboard-btn:hover {
+                background: #d7ad60;
+                color: #38251c;
+            }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 18px;
+            margin: 25px 0;
+        }
+
+        .card {
+            position: relative;
+            background: white;
+            padding: 23px;
+            border-radius: 13px;
+            border: 1px solid #eadcc8;
+            box-shadow: 0 4px 14px #38251c0d;
+            border-left: 5px solid #c49a45;
+        }
+
+            .card h3 {
+                margin: 0 0 13px;
+                color: #806044;
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            .card strong {
+                font-size: 25px;
+                color: #5b3825;
+                overflow-wrap: anywhere;
+            }
+
+        .section {
+            background: white;
+            padding: 25px;
+            margin-top: 25px;
+            border: 1px solid #eadcc8;
+            border-radius: 14px;
+            box-shadow: 0 4px 14px #38251c0d;
+            overflow-x: auto;
+        }
+
+            .section h2 {
+                margin: 0 0 20px;
+                color: #5b3825;
+                padding-bottom: 13px;
+                border-bottom: 2px solid #eadcc8;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1100px;
+        }
+
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee7dd;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #70452f;
+            color: #fff;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+        }
+
+        tbody tr:hover {
+            background: #faf6ef;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .rank {
+            font-weight: bold;
+            color: #a77a2e;
+        }
+
+        .invoice-btn {
+            display: inline-block;
+            padding: 9px 13px;
+            background: #c49a45;
+            color: #38251c;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+            .invoice-btn:hover {
+                background: #a77a2e;
+                color: white;
+            }
+
+        .delete-btn {
+            background: #b42318;
+            color: white;
+            padding: 9px 13px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+            .delete-btn:hover,
+            .delete-all:hover {
+                background: #8f1b13;
+            }
+
+        .delete-all {
+            background: #a32119;
+            padding: 11px 17px;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        input[type="password"] {
+            padding: 10px;
+            width: 165px;
+            border: 1px solid #d6c8b8;
+            border-radius: 6px;
+            margin: 3px;
+        }
+
+            input[type="password"]:focus {
+                outline: none;
+                border-color: #c49a45;
+            }
+
+        .message {
+            padding: 13px 16px;
+            margin: 12px 0;
+            border-radius: 8px;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #b42318;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .empty {
+            padding: 35px;
+            text-align: center;
+            color: #806d5d;
+            background: #faf6ef;
+            border-radius: 10px;
+        }
+
+        .delete-all-area {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #faf6ef;
+            border: 1px solid #eadcc8;
+            border-radius: 9px;
+        }
+
+            .delete-all-area form {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .delete-all-area p {
+                margin: 0 0 10px;
+                color: #806044;
+                font-size: 13px;
+            }
+
+        .delete-form {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        @@media (max-width: 650px) {
+            body {
+                padding: 12px;
+            }
+
+            .top {
+                padding: 20px;
+            }
+
+                .top h1 {
+                    font-size: 23px;
+                }
+
+            .top-actions {
+                width: 100%;
+            }
+
+                .top-actions .btn {
+                    flex: 1;
+                    text-align: center;
+                }
+
+            .section {
+                padding: 16px;
+            }
+
+            .delete-form {
+                min-width: 280px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="top">
+            <div>
+                <h1>Sales Management</h1>
+                <p>SmartInventory | Sales Reports &amp; History</p>
+            </div>
+
+            <div class="top-actions">
+                <a class="btn" href="@Url.Action("Create", "Sales")">
+                    + New Sale
+                </a>
+
+                <a class="btn dashboard-btn" href="@Url.Action("Index", "Home")">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Total Sales</h3>
+                <strong>₹@totalSales.ToString("N2")</strong>
+            </div>
+
+            <div class="card">
+                <h3>Today's Sales</h3>
+                <strong>₹@todaySales.ToString("N2")</strong>
+            </div>
+
+            <div class="card">
+                <h3>This Month's Sales</h3>
+                <strong>₹@monthSales.ToString("N2")</strong>
+            </div>
+
+            <div class="card">
+                <h3>Total Transactions</h3>
+                <strong>@sales.Count</strong>
+            </div>
+
+            <div class="card">
+                <h3>Total Items Sold</h3>
+                <strong>@totalItems</strong>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🏆 Top Selling Products</h2>
+
+            @if (topProducts.Any())
+            {
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Product Name</th>
+                            <th>Quantity Sold</th>
+                            <th>Total Revenue</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for (int i = 0; i < topProducts.Count; i++)
+                        {
+                            var item = topProducts[i];
+
+                            <tr>
+                                <td class="rank">#@(i + 1)</td>
+                                <td>@item.ProductName</td>
+                                <td>@item.QuantitySold</td>
+                                <td>₹@item.Revenue.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty">
+                    Abhi koi sales data available nahi hai.
+                </div>
+            }
+        </div>
+
+        <div class="section">
+            <h2>📋 Sales History</h2>
+
+            @if (TempData["DeleteError"] != null)
+            {
+                <div class="message error">
+                    @TempData["DeleteError"]
+                </div>
+            }
+
+            @if (TempData["DeleteSuccess"] != null)
+            {
+                <div class="message success">
+                    @TempData["DeleteSuccess"]
+                </div>
+            }
+
+            @if (sales.Any())
+            {
+                <div class="delete-all-area">
+                    <p>⚠️ Delete karne ke liye Admin Delete Code required hai.</p>
+
+                    <form action="@Url.Action("DeleteAll", "Sales")"
+                          method="post"
+                          onsubmit="return confirm('WARNING: Kya aap sach mein SAARI sales delete karna chahte hain?');">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="password"
+                               name="adminDeleteCode"
+                               placeholder="Admin Delete Code"
+                               required />
+
+                        <button type="submit" class="delete-all">
+                            Delete All Sales
+                        </button>
+                    </form>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sale ID</th>
+                            <th>Product</th>
+                            <th>Customer</th>
+                            <th>Customer Phone</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total Amount</th>
+                            <th>Sale Date</th>
+                            <th>Invoice</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var sale in sales)
+                        {
+                            <tr>
+                                <td>@sale.Id</td>
+                                <td>@(sale.Product?.Name ?? "Product unavailable")</td>
+                                <td>@(string.IsNullOrWhiteSpace(sale.CustomerName) ? "-" : sale.CustomerName)</td>
+                                <td>@(string.IsNullOrWhiteSpace(sale.CustomerPhone) ? "-" : sale.CustomerPhone)</td>
+                                <td>@sale.Quantity</td>
+                                <td>₹@sale.UnitPrice.ToString("N2")</td>
+                                <td>₹@sale.TotalAmount.ToString("N2")</td>
+                                <td>@sale.SaleDate.ToString("dd-MM-yyyy hh:mm tt")</td>
+
+                                <td>
+                                    <a href="@Url.Action("Invoice", "Sales", new { id = sale.Id })"
+                                       class="invoice-btn">
+                                        Generate Invoice
+                                    </a>
+                                </td>
+
+                                <td>
+                                    <form class="delete-form"
+                                          action="@Url.Action("Delete", "Sales")"
+                                          method="post"
+                                          onsubmit="return confirm('Kya aap is sale ko delete karna chahte hain?');">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@sale.Id" />
+
+                                        <input type="password"
+                                               name="adminDeleteCode"
+                                               placeholder="Admin Delete Code"
+                                               required />
+
+                                        <button type="submit" class="delete-btn">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty">
+                    <h3>Abhi koi sale record nahi hai.</h3>
+                    <p>New Sale button se pehli sale add kar sakte ho.</p>
+                </div>
+            }
+        </div>
+
+    </div>
+</body>
+</html>

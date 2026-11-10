@@ -1,0 +1,588 @@
+﻿@{
+    ViewData["Title"] = "Smart Inventory Chatbot";
+    Layout = null;
+    bool isAdmin = User.IsInRole("Admin");
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Assistant | SmartInventory</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --linen: #F3EBDD;
+            --cream: #FFFCF7;
+            --espresso: #38271F;
+            --brown: #594337;
+            --taupe: #897362;
+            --gold: #C5A46D;
+            --gold-light: #E9D7B5;
+            --border: #E8DCCB;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--linen);
+            color: var(--espresso);
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            width: 255px;
+            height: 100vh;
+            background: linear-gradient(180deg, #38271F, #241813);
+            padding: 30px 20px;
+            color: var(--cream);
+            flex-shrink: 0;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 5px 10px 45px;
+            letter-spacing: -1px;
+        }
+
+            .brand span {
+                color: var(--gold);
+            }
+
+        .nav-title {
+            color: #BCA995;
+            font-size: 10px;
+            letter-spacing: 2px;
+            margin: 25px 12px 12px;
+        }
+
+        .nav-link {
+            display: block;
+            color: #E9DED3;
+            text-decoration: none;
+            padding: 14px;
+            margin: 8px 0;
+            border-radius: 11px;
+            font-size: 14px;
+            transition: .25s;
+        }
+
+            .nav-link:hover,
+            .nav-link.active {
+                background: linear-gradient(110deg, #806344, #A8875C);
+                color: white;
+                transform: translateX(3px);
+            }
+
+        .sidebar-bottom {
+            margin-top: 60px;
+            padding: 18px 12px;
+            border-top: 1px solid #766558;
+            color: #D4C4B7;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        /* Main */
+        .main {
+            margin-left: 255px;
+            flex: 1;
+            min-width: 0;
+            padding: 35px 40px;
+        }
+
+        .page-title {
+            font-size: 30px;
+            margin: 0 0 8px;
+        }
+
+        .subtitle {
+            color: var(--taupe);
+            margin: 0 0 30px;
+            font-size: 14px;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            max-width: 950px;
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 12px 35px #38271F12;
+        }
+
+        .chat-header {
+            background: linear-gradient(115deg, #38271F, #614A38);
+            color: var(--cream);
+            padding: 27px 30px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+            .chat-header h2 {
+                margin: 0 0 8px;
+                font-size: 23px;
+            }
+
+            .chat-header p {
+                color: var(--gold-light);
+                margin: 0;
+                font-size: 13px;
+            }
+
+        .chat-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 25px;
+            height: 430px;
+            overflow-y: auto;
+            background: #FFFEFC;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background: #F2EBDD;
+            color: var(--espresso);
+            padding: 14px 18px;
+            border: 1px solid #E8DCCB;
+            border-radius: 16px 16px 16px 3px;
+            max-width: 75%;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(110deg, #594337, #806344);
+            color: white;
+            padding: 14px 18px;
+            border-radius: 16px 16px 3px 16px;
+            max-width: 75%;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+            font-size: 14px;
+        }
+
+        /* Quick Questions */
+        .quick-questions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 5px 0 10px;
+        }
+
+            .quick-questions button {
+                background: var(--cream);
+                color: var(--brown);
+                border: 1px solid var(--gold);
+                padding: 10px 16px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 13px;
+                transition: .25s;
+            }
+
+                .quick-questions button:hover {
+                    background: var(--espresso);
+                    color: white;
+                    border-color: var(--espresso);
+                }
+
+        /* Footer */
+        .chat-footer {
+            padding: 21px 25px;
+            border-top: 1px solid var(--border);
+            background: var(--cream);
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+            .chat-input input {
+                flex: 1;
+                min-width: 0;
+                padding: 14px 16px;
+                border: 1px solid #DED3C7;
+                border-radius: 11px;
+                background: #FCFAF6;
+                color: var(--espresso);
+                font-size: 14px;
+                outline: none;
+            }
+
+                .chat-input input:focus {
+                    border-color: var(--gold);
+                    box-shadow: 0 0 0 3px #C5A46D20;
+                }
+
+        .send-btn {
+            background: linear-gradient(110deg, #806344, #B08A55);
+            color: white;
+            border: none;
+            padding: 13px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: .2s;
+        }
+
+            .send-btn:hover {
+                opacity: .9;
+                transform: translateY(-2px);
+            }
+
+            .send-btn:disabled {
+                opacity: .6;
+                cursor: not-allowed;
+            }
+
+        .clear-btn {
+            background: var(--gold-light);
+            color: var(--espresso);
+            border: 1px solid #D8C19A;
+            padding: 13px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: .2s;
+        }
+
+            .clear-btn:hover {
+                background: #DDC69E;
+            }
+
+        .footer {
+            max-width: 950px;
+            margin-top: 25px;
+            padding-top: 17px;
+            border-top: 1px solid #D9CBBE;
+            text-align: center;
+            color: var(--taupe);
+            font-size: 11px;
+        }
+
+        /* Mobile */
+        @@media (max-width: 800px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 17px;
+            }
+
+            .brand {
+                margin: 5px 8px 17px;
+            }
+
+            .nav-title,
+            .sidebar-bottom {
+                display: none;
+            }
+
+            .nav-link {
+                display: inline-block;
+                padding: 10px;
+                margin: 3px;
+                font-size: 12px;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 25px 15px;
+            }
+
+            .chat-body {
+                height: 380px;
+                padding: 18px;
+            }
+
+            .chat-footer {
+                padding: 15px;
+            }
+
+            .chat-input {
+                flex-wrap: wrap;
+            }
+
+                .chat-input input {
+                    flex-basis: 100%;
+                }
+
+            .bot-message,
+            .user-message {
+                max-width: 90%;
+            }
+        }
+
+        @@media (max-width: 400px) {
+            .send-btn,
+            .clear-btn {
+                flex: 1;
+            }
+
+            .page-title {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="brand">Smart<span>Inventory.</span></div>
+
+            <div class="nav-title">MAIN MENU</div>
+
+            <a class="nav-link" href="/Home/Index">
+                ⌂ Dashboard
+            </a>
+
+            @if (isAdmin)
+            {
+                <a class="nav-link" href="@Url.Action("Index", "Sales")">
+                    🧾 Sales Management
+                </a>
+            }
+
+            <a class="nav-link" href="/Home/Products">
+                ▦ Products
+            </a>
+
+            @if (isAdmin)
+            {
+                <a class="nav-link" href="/Home/AddProduct">
+                    ＋ Add Product
+                </a>
+            }
+
+            <div class="nav-title">TOOLS</div>
+
+            <a class="nav-link active" href="/Home/Chatbot">
+                ✧ AI Assistant
+            </a>
+
+            <div class="sidebar-bottom">
+                Smart Inventory Management<br />
+                © 2026 SmartInventory
+            </div>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+
+            <h1 class="page-title">AI Inventory Assistant</h1>
+
+            <p class="subtitle">
+                Ask questions about your products and inventory stock.
+            </p>
+
+            <div class="chat-container">
+
+                <div class="chat-header">
+                    <h2>✧ Smart Inventory AI</h2>
+                    <p>Your personal Product Stock Assistant</p>
+                </div>
+
+                <div class="chat-body" id="chatBody">
+
+                    <div class="bot-message">
+                        Hello! 👋 Welcome to SmartInventory.
+                        Ask me about product availability and stock.
+                    </div>
+
+                    <div class="quick-questions">
+
+                        <button type="button"
+                                onclick="askQuestion('How many products are available?')">
+                            Total Products
+                        </button>
+
+                        <button type="button"
+                                onclick="askQuestion('Show low stock products')">
+                            Low Stock
+                        </button>
+
+                        <button type="button"
+                                onclick="askQuestion('iPhone stock')">
+                            Check iPhone Stock
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="chat-footer">
+
+                    <div class="chat-input">
+
+                        <input type="text"
+                               id="message"
+                               placeholder="Ask about product stock..." />
+
+                        <button class="send-btn"
+                                id="sendBtn"
+                                type="button">
+                            Send
+                        </button>
+
+                        <button class="clear-btn"
+                                type="button"
+                                id="clearBtn">
+                            Clear Chat
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <footer class="footer">
+                SmartInventory · Premium Inventory Management
+            </footer>
+
+        </main>
+
+    </div>
+
+    <script>
+
+        async function sendMessage() {
+
+            const input = document.getElementById("message");
+            const chatBody = document.getElementById("chatBody");
+            const sendBtn = document.getElementById("sendBtn");
+
+            const message = input.value.trim();
+
+            if (!message || sendBtn.disabled) return;
+
+            sendBtn.disabled = true;
+            sendBtn.innerText = "Sending...";
+
+            const userDiv = document.createElement("div");
+            userDiv.className = "user-message";
+            userDiv.innerText = message;
+            chatBody.appendChild(userDiv);
+
+            input.value = "";
+
+            const botDiv = document.createElement("div");
+            botDiv.className = "bot-message";
+            botDiv.innerText = "🤖 Thinking...";
+            chatBody.appendChild(botDiv);
+
+            chatBody.scrollTo({
+                top: chatBody.scrollHeight,
+                behavior: "smooth"
+            });
+
+            try {
+
+                const response = await fetch("/api/Chatbot", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error("API request failed: " + response.status);
+                }
+
+                const data = await response.json();
+                botDiv.innerText = data.reply || "No reply received.";
+
+            }
+            catch (error) {
+
+                botDiv.innerText = "Something went wrong!";
+                console.error(error);
+
+            }
+            finally {
+
+                sendBtn.disabled = false;
+                sendBtn.innerText = "Send";
+
+                chatBody.scrollTo({
+                    top: chatBody.scrollHeight,
+                    behavior: "smooth"
+                });
+
+            }
+        }
+
+        function askQuestion(question) {
+            document.getElementById("message").value = question;
+            sendMessage();
+        }
+
+        function clearChat() {
+
+            document.getElementById("chatBody").innerHTML = `
+                <div class="bot-message">
+                    Hello! 👋 Welcome to SmartInventory.
+                    Ask me about product availability and stock.
+                </div>
+
+                <div class="quick-questions">
+                    <button type="button" onclick="askQuestion('How many products are available?')">
+                        Total Products
+                    </button>
+
+                    <button type="button" onclick="askQuestion('Show low stock products')">
+                        Low Stock
+                    </button>
+
+                    <button type="button" onclick="askQuestion('iPhone stock')">
+                        Check iPhone Stock
+                    </button>
+                </div>
+            `;
+
+        }
+
+        document.getElementById("sendBtn").addEventListener("click", function (event) {
+            event.preventDefault();
+            sendMessage();
+        });
+
+        document.getElementById("clearBtn").addEventListener("click", function () {
+            clearChat();
+        });
+
+        document.getElementById("message").addEventListener("keydown", function (event) {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+    </script>
+
+</body>
+</html>

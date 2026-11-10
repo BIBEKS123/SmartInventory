@@ -1,0 +1,612 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "SmartInventory Dashboard";
+    bool isAdmin = User.IsInRole("Admin");
+    string workspaceName = isAdmin ? "Admin Workspace" : "User Workspace";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SmartInventory | Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --linen: #F3EBDD;
+            --cream: #FFFCF7;
+            --espresso: #38271F;
+            --brown: #594337;
+            --taupe: #897362;
+            --gold: #C5A46D;
+            --gold-light: #E9D7B5;
+            --border: #E8DCCB;
+            --green: #52785C;
+            --red: #A65345;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--linen);
+            color: var(--espresso);
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 255px;
+            background: linear-gradient(180deg, #38271F, #241813);
+            color: var(--cream);
+            padding: 30px 20px;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 5px 10px 45px;
+            letter-spacing: -1px;
+        }
+
+            .logo span {
+                color: var(--gold);
+            }
+
+        .nav-label {
+            color: #BCA995;
+            font-size: 10px;
+            letter-spacing: 2px;
+            margin: 25px 12px 12px;
+        }
+
+        .nav-link {
+            display: block;
+            color: #E9DED3;
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 11px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            transition: .25s;
+        }
+
+            .nav-link:hover,
+            .nav-link.active {
+                background: linear-gradient(100deg, #806344, #A8875C);
+                color: white;
+                transform: translateX(3px);
+            }
+
+        .sidebar-bottom {
+            margin-top: 60px;
+            padding: 18px 12px;
+            border-top: 1px solid #766558;
+            color: #D4C4B7;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        /* Main */
+        .main {
+            flex: 1;
+            min-width: 0;
+            padding: 32px 40px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            gap: 15px;
+        }
+
+            .topbar h2 {
+                font-size: 23px;
+                margin: 0;
+            }
+
+            .topbar p {
+                color: var(--taupe);
+                font-size: 13px;
+                margin: 6px 0 0;
+            }
+
+        .profile {
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 11px 18px;
+            font-size: 13px;
+            color: var(--brown);
+        }
+
+        /* Welcome */
+        .welcome {
+            background: linear-gradient(115deg, #38271F, #614A38);
+            color: var(--cream);
+            border: 1px solid #806344;
+            border-radius: 22px;
+            padding: 42px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px #38271F20;
+        }
+
+            .welcome:after {
+                content: "✦";
+                position: absolute;
+                right: 55px;
+                top: 5px;
+                font-size: 130px;
+                color: var(--gold);
+                opacity: .16;
+            }
+
+        .tag {
+            display: inline-block;
+            background: var(--gold-light);
+            color: var(--espresso);
+            border-radius: 30px;
+            padding: 8px 15px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+        }
+
+        .welcome h1 {
+            font-size: 34px;
+            margin: 22px 0 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome p {
+            color: #E8DCCF;
+            font-size: 14px;
+            margin: 0;
+            max-width: 510px;
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Section headings */
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 35px 0 18px;
+            gap: 12px;
+        }
+
+            .section-heading h3 {
+                margin: 0;
+                font-size: 19px;
+            }
+
+            .section-heading span {
+                font-size: 12px;
+                color: var(--taupe);
+            }
+
+        /* Statistics */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .card {
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 26px;
+            transition: .25s;
+            box-shadow: 0 6px 20px #38271F08;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 28px #38271F16;
+                border-color: var(--gold);
+            }
+
+            .card:before {
+                content: "";
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 4px;
+                height: 100%;
+                background: var(--gold);
+            }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            color: var(--taupe);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .icon {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            background: #F0E6D8;
+            border-radius: 13px;
+            font-size: 21px;
+        }
+
+        .number {
+            font-size: 42px;
+            font-weight: 800;
+            margin-top: 20px;
+            color: var(--espresso);
+        }
+
+        .card-description {
+            color: var(--taupe);
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        /* Quick actions */
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .action-card {
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 25px;
+            transition: .25s;
+        }
+
+            .action-card:hover {
+                border-color: var(--gold);
+                box-shadow: 0 10px 25px #38271F10;
+            }
+
+            .action-card h4 {
+                margin: 0 0 10px;
+                font-size: 16px;
+            }
+
+            .action-card p {
+                color: var(--taupe);
+                font-size: 13px;
+                line-height: 1.7;
+                margin: 0 0 20px;
+            }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            padding: 12px 19px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 750;
+            transition: .25s;
+            margin: 3px 5px 3px 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(110deg, #806344, #B08A55);
+            color: white;
+            box-shadow: 0 5px 12px #80634425;
+        }
+
+        .btn-secondary {
+            background: var(--gold-light);
+            color: var(--espresso);
+            border: 1px solid #D8C19A;
+        }
+
+        .btn:hover {
+            opacity: .9;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            margin-top: 38px;
+            padding-top: 20px;
+            border-top: 1px solid #D9CBBE;
+            text-align: center;
+            color: var(--taupe);
+            font-size: 11px;
+        }
+
+        /* Responsive */
+        @@media (max-width: 800px) {
+            .sidebar {
+                width: 205px;
+                padding: 25px 13px;
+            }
+
+            .main {
+                padding: 25px 20px;
+            }
+        }
+
+        @@media (max-width: 600px) {
+            .layout {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 15px;
+            }
+
+            .logo {
+                margin: 5px 8px 15px;
+            }
+
+            .nav-label,
+            .sidebar-bottom {
+                display: none;
+            }
+
+            .nav-link {
+                display: inline-block;
+                padding: 9px 10px;
+                margin: 3px;
+                font-size: 12px;
+            }
+
+            .main {
+                padding: 20px 15px;
+            }
+
+            .cards,
+            .actions {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome {
+                padding: 27px;
+            }
+
+                .welcome h1 {
+                    font-size: 25px;
+                }
+
+                .welcome:after {
+                    right: 12px;
+                    font-size: 75px;
+                }
+
+            .topbar {
+                flex-wrap: wrap;
+            }
+
+                .topbar h2 {
+                    font-size: 19px;
+                }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="logo">Smart<span>Inventory.</span></div>
+
+            <div class="nav-label">MAIN MENU</div>
+
+            <a href="/Home/Index" class="nav-link active">
+                ⌂ Dashboard
+            </a>
+
+            @if (isAdmin)
+            {
+                <a href="@Url.Action("Index", "Sales")" class="nav-link">
+                    🧾 Sales Management
+                </a>
+            }
+
+            <a href="/Home/Products" class="nav-link">
+                ▣ Products
+            </a>
+
+            @if (isAdmin)
+            {
+                <a href="/Home/AddProduct" class="nav-link">
+                    ＋ Add Product
+                </a>
+            }
+
+            <div class="nav-label">TOOLS</div>
+
+            <a href="/Home/Chatbot" class="nav-link">
+                ✦ AI Chatbot
+            </a>
+
+            <div class="sidebar-bottom">
+                Smart Inventory Management<br />
+                © 2026 SmartInventory
+            </div>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+
+            <header class="topbar">
+                <div>
+                    <h2>Dashboard Overview</h2>
+                    <p>Welcome to your inventory workspace.</p>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+
+                    <div class="profile">
+                        ✦ @workspaceName
+                    </div>
+
+                    <form action="/Account/Logout" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit" class="btn btn-primary">
+                            Logout ↗
+                        </button>
+                    </form>
+
+                </div>
+            </header>
+
+            <!-- Welcome Section -->
+            <section class="welcome">
+
+                <span class="tag">
+                    @(isAdmin ? "ADMIN MANAGEMENT" : "USER WORKSPACE")
+                </span>
+
+                <h1>
+                    @(isAdmin ? "Welcome Back, Admin 👋" : "Welcome to SmartInventory 👋")
+                </h1>
+
+                <p>
+                    @if (isAdmin)
+                    {
+                        <text>
+                            Manage your products, monitor stock levels and control
+                            your inventory from one place.
+                        </text>
+                    }
+                    else
+                    {
+                        <text>
+                            Explore available products, check inventory information
+                            and use the AI assistant.
+                        </text>
+                    }
+                </p>
+
+            </section>
+
+            <!-- Statistics -->
+            <div class="section-heading">
+                <h3>Inventory Statistics</h3>
+                <span>Live dashboard data</span>
+            </div>
+
+            <section class="cards">
+
+                <div class="card">
+                    <div class="card-top">
+                        <span class="card-title">Total Products</span>
+                        <div class="icon">📦</div>
+                    </div>
+
+                    <div class="number">@ViewBag.TotalProducts</div>
+
+                    <div class="card-description">
+                        Registered inventory products
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-top">
+                        <span class="card-title">Low Stock Products</span>
+                        <div class="icon">⚠️</div>
+                    </div>
+
+                    <div class="number">@ViewBag.LowStock</div>
+
+                    <div class="card-description">
+                        Products with stock of 5 or less
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Quick Actions -->
+            <div class="section-heading">
+                <h3>Quick Actions</h3>
+
+                <span>
+                    @(isAdmin ? "Manage your workspace" : "Explore your workspace")
+                </span>
+            </div>
+
+            <section class="actions">
+
+                <div class="action-card">
+                    <h4>📦 Product Management</h4>
+
+                    @if (isAdmin)
+                    {
+                        <p>
+                            View, add, update and manage your inventory products.
+                        </p>
+                    }
+                    else
+                    {
+                        <p>
+                            View available products and check stock information.
+                        </p>
+                    }
+
+                    <a href="/Home/Products" class="btn btn-primary">
+                        View Products →
+                    </a>
+
+                    @if (isAdmin)
+                    {
+                        <a href="/Home/AddProduct" class="btn btn-secondary">
+                            Add Product →
+                        </a>
+                    }
+                </div>
+
+                <div class="action-card">
+                    <h4>✦ Inventory Assistant</h4>
+
+                    <p>
+                        Ask the chatbot about product availability and stock levels.
+                    </p>
+
+                    <a href="/Home/Chatbot" class="btn btn-secondary">
+                        Open AI Chatbot →
+                    </a>
+                </div>
+
+            </section>
+
+            <footer class="footer">
+                SmartInventory · Premium Inventory Management
+            </footer>
+
+        </main>
+    </div>
+</body>
+</html>
