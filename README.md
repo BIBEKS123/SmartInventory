@@ -13,6 +13,23 @@ A web-based Product Inventory Management System developed using **ASP.NET Core M
 - **REST API** – API endpoints for product and chatbot operations.
 - **Database Integration** – SQL Server with Entity Framework Core.
 
+## 📸 Application Screenshots
+
+### Admin Dashboard
+![SmartInventory Admin Dashboard](screenshots/admin-dashboard.png)
+
+### Inventory Statistics
+![SmartInventory Inventory Statistics](screenshots/inventory-statistics.png)
+
+### Product Management
+![SmartInventory Product Management](screenshots/product-management.png)
+
+### Low Stock Alert
+![SmartInventory Low Stock Alert](screenshots/low-stock-alert.png)
+
+### AI Inventory Assistant
+![SmartInventory AI Inventory Assistant](screenshots/ai-inventory-assistant.png)
+
 ## 🛠️ Technologies Used
 
 | Technology | Purpose |
